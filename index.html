@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kirby Arcade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+       
+        body {
+            min-height: 100vh;
+            font-family: 'Press Start 2P', cursive, Arial, sans-serif;
+            color: #fff;
+            background-color: #ff8787;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 1.2em;
+            color: white;
+            font-family: 'Press Start 2P', cursive;
+            text-align: center;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Glass Clock */
+        #clock-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 20px 25px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #clock-container.show {
+            opacity: 1;
+        }
+
+        #clock-time {
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 28px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            letter-spacing: 2px;
+        }
+
+        #clock-date {
+            font-family: 'Lato', sans-serif;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            font-weight: 600;
+        }
+
+        /* Original Kirby Background */
+        #kirby-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            background: #ff8787 url('https://cdn.jsdelivr.net/gh/dino-cmxy/Kirby-Arcade-ig-idk-anymore@main/pxsprite-kirbyinspaceee.gif') no-repeat center center;
+            background-size: cover;
+        }
+
+        /* Glass Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 50px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .navbar.show {
+            opacity: 1;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 20px;
+            text-decoration: none;
+        }
+        
+        .logo:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .logo h1 {
+            font-size: 14px;
+            color: white;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            font-family: 'Press Start 2P', cursive;
+        }
+        
+        .kirby-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            overflow: hidden;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+        
+        .kirby-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-family: 'Lato', sans-serif;
+            font-size: 14px;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-links a i {
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-links a:hover i {
+            transform: scale(1.2);
+        }
+
+        /* Glass Battery UI */
+        #battery-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 10px 18px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #battery-container.show {
+            opacity: 1;
+        }
+
+        #battery-oval {
+            width: 75px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            padding: 4px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        #battery-level {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            background: linear-gradient(135deg, #00ffaa, #00cc88);
+            width: 75%;
+            box-shadow: 0 2px 8px rgba(0, 204, 136, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        #battery-level::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            border-radius: 12px;
+        }
+
+        #battery-percent {
+            font-family: 'Silkscreen', 'Courier New', monospace;
+            font-size: 14px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+            min-width: 35px;
+            text-align: center;
+        }
+
+        /* Main content area */
+        #main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+            padding: 30px 20px;
+            margin: 100px auto 0;
+            position: relative;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #main-content.show {
+            opacity: 1;
+        }
+
+        .title {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            padding: 20px;
+            color: #fff;
+            white-space: nowrap;
+            height: 1.2em;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            font-family: 'Press Start 2P', cursive !important;
+            transform: translateZ(0);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+        }
+
+        .typing-container {
+            display: inline-block;
+            min-height: 1.2em;
+        }
+
+        .typing-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1em;
+            background: white;
+            vertical-align: middle;
+            margin-left: 5px;
+            animation: blink 0.7s infinite;
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+        }
+
+        @keyframes blink {
+            0%, 100% { 
+                opacity: 1; 
+            }
+            50% { 
+                opacity: 0; 
+            }
+        }
+       
+        /* Glass Search area */
+        .search-container {
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            margin: 15px 0 5px;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 16px 24px;
+            padding-right: 60px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: white;
+            outline: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-family: 'Lato', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-bar::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-bar:focus {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 
+                0 8px 32px rgba(255, 255, 255, 0.2),
+                0 0 0 3px rgba(255, 255, 255, 0.3),
+                0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .search-bar:hover {
+            box-shadow: 
+                0 8px 32px rgba(255, 255, 255, 0.2),
+                0 0 0 3px rgba(255, 255, 255, 0.3),
+                0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .search-button {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            color: #ff6b6b;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Press Start 2P', cursive;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-button:hover {
+            transform: translateY(-50%) scale(1.1);
+            background: white;
+            box-shadow: 
+                0 6px 20px rgba(255, 255, 255, 0.3),
+                0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* Enhanced Discord Button */
+        .discord-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #5865F2, #7289da);
+            color: white;
+            border-radius: 50px;
+            text-decoration: none;
+            font-family: 'Lato', sans-serif;
+            font-size: 1.1em;
+            font-weight: bold;
+            z-index: 2;
+            transition: all 0.4s ease;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 
+                0 8px 25px rgba(88, 101, 242, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .discord-btn.show {
+            opacity: 1;
+        }
+
+        .discord-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .discord-btn:hover::before {
+            left: 100%;
+        }
+
+        .discord-btn i {
+            color: white;
+            font-size: 1.3em;
+            transition: all 0.3s ease;
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+        }
+
+        .discord-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .discord-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            background: linear-gradient(135deg, #4752c4, #5b6eae);
+            box-shadow: 
+                0 12px 30px rgba(88, 101, 242, 0.6),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+                0 0 20px rgba(255, 107, 107, 0.4);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .discord-btn:hover i {
+            transform: scale(1.2) rotate(5deg);
+            filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.3));
+        }
+
+        .discord-btn:active {
+            transform: translateY(-2px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { 
+                transform: rotate(360deg); 
+            }
+        }
+
+        /* Kirby characters floating around */
+        .kirby-float {
+            position: fixed;
+            z-index: 1;
+            opacity: 0.7;
+            animation: float 15s infinite linear;
+        }
+
+        .kirby-float:nth-child(1) {
+            top: 20%;
+            left: 5%;
+            animation-duration: 20s;
+            font-size: 40px;
+        }
+
+        .kirby-float:nth-child(2) {
+            top: 60%;
+            right: 10%;
+            animation-duration: 25s;
+            font-size: 30px;
+        }
+
+        .kirby-float:nth-child(3) {
+            bottom: 30%;
+            left: 15%;
+            animation-duration: 18s;
+            font-size: 35px;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+            }
+        }
+
+        /* Responsive styles */
+        @media screen and (max-width: 900px) {
+            .title {
+                font-size: 2.5em;
+            }
+            .navbar {
+                width: 95%;
+                padding: 12px 20px;
+            }
+            .logo h1 {
+                font-size: 12px;
+            }
+            .kirby-logo {
+                width: 32px;
+                height: 32px;
+            }
+            .nav-links {
+                gap: 10px;
+            }
+            .nav-links a {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            .nav-links a i {
+                font-size: 14px;
+            }
+            #clock-container {
+                top: 90px;
+                right: 20px;
+                padding: 18px 22px;
+            }
+            #clock-time {
+                font-size: 24px;
+            }
+            #clock-date {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2em;
+            }
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+                border-radius: 25px;
+                padding: 10px 20px;
+            }
+            .discord-btn {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+            .search-bar {
+                font-size: 1.1em;
+                padding: 14px 20px;
+                padding-right: 55px;
+            }
+            .search-button {
+                width: 40px;
+                height: 40px;
+                font-size: 1em;
+            }
+            #battery-container {
+                padding: 8px 15px;
+            }
+            #battery-oval {
+                width: 65px;
+                height: 28px;
+            }
+            #clock-container {
+                top: 120px;
+                padding: 16px 20px;
+            }
+            #clock-time {
+                font-size: 22px;
+            }
+        }
+
+        @media only screen and (max-width: 600px) {
+            .discord-btn {
+                right: 15px;
+                bottom: 15px;
+                padding: 10px 16px;
+            }
+            #battery-container {
+                bottom: 15px;
+                left: 15px;
+                padding: 6px 12px;
+            }
+            #battery-oval {
+                width: 60px;
+                height: 25px;
+            }
+            #battery-percent {
+                font-size: 12px;
+            }
+            .nav-links a span {
+                display: none;
+            }
+            .nav-links a {
+                padding: 8px 12px;
+            }
+            .nav-links a i {
+                font-size: 16px;
+                margin: 0;
+            }
+            #clock-container {
+                top: 120px;
+                right: 15px;
+                padding: 14px 18px;
+            }
+            #clock-time {
+                font-size: 20px;
+            }
+            #clock-date {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .title {
+                font-size: 1.5em;
+            }
+            .search-bar {
+                padding: 12px 18px;
+                padding-right: 50px;
+                font-size: 1em;
+            }
+            .search-button {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9em;
+            }
+            .discord-btn {
+                font-size: 0.9em;
+                padding: 8px 14px;
+            }
+            .navbar {
+                padding: 8px 15px;
+            }
+            .logo h1 {
+                font-size: 10px;
+            }
+            .kirby-logo {
+                width: 28px;
+                height: 28px;
+            }
+            .nav-links {
+                gap: 5px;
+            }
+            .nav-links a {
+                padding: 5px 8px;
+                font-size: 11px;
+            }
+            #battery-container {
+                padding: 5px 10px;
+            }
+            #battery-oval {
+                width: 55px;
+                height: 22px;
+            }
+            #battery-percent {
+                font-size: 11px;
+            }
+            #clock-container {
+                top: 120px;
+                right: 10px;
+                padding: 12px 15px;
+            }
+            #clock-time {
+                font-size: 18px;
+            }
+            #clock-date {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">ACTUAL V3 TIME!!!!</div>
+    </div>
+
+    <!-- Glass Clock -->
+    <div id="clock-container">
+        <div id="clock-time">00:00:00</div>
+        <div id="clock-date">Loading...</div>
+    </div>
+
+    <!-- Background element -->
+    <div id="kirby-background" role="img" aria-label="Animated Kirby background"></div>
+   
+    <!-- Floating Kirby characters -->
+    <div class="kirby-float">⭐</div>
+    <div class="kirby-float">🍓</div>
+    <div class="kirby-float">🍰</div>
+
+    <!-- Glass Navigation Bar -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <div class="kirby-logo">
+                <img src="https://cdn.jsdelivr.net/gh/dino-cmxy/Kirby-Arcade-ig-idk-anymore@main/kirb.gif" alt="Kirby Logo">
+            </div>
+            <h1>Kirby Arcade</h1>
+        </a>
+        <div class="nav-links">
+            <a href="games.html">
+                <i class="fas fa-gamepad"></i>
+                <span>Games</span>
+            </a>
+            <a href="apps.html">
+                <i class="fas fa-mobile-alt"></i>
+                <span>Apps</span>
+            </a>
+            <a href="extras.html">
+                <i class="fas fa-plus"></i>
+                <span>Extras</span>
+            </a>
+            <a href="settings.html">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Glass Battery status -->
+    <div id="battery-container">
+        <div id="battery-oval">
+            <div id="battery-level"></div>
+        </div>
+        <span id="battery-percent">75%</span>
+    </div>
+
+    <!-- Main content -->
+    <main id="main-content">
+        <h1 class="title">
+            <span class="typing-container" id="typing-text"></span>
+            <span class="typing-cursor" aria-hidden="true"></span>
+        </h1>
+       
+        <div class="search-container">
+            <input type="text" class="search-bar" placeholder="Search Something ig i dont rly care...." aria-label="Search">
+            <button class="search-button" type="button" aria-label="Search">
+                <i class="fas fa-search" aria-hidden="true"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Enhanced Discord link -->
+    <a href="https://discord.gg/YpxnycpwDW" class="discord-btn" target="_blank" rel="noopener noreferrer">
+        <i class="fab fa-discord" aria-hidden="true"></i>
+        <span>Join Our Discord</span>
+    </a>
+
+    <script>
+        // Loading screen functionality
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const loadingScreen = document.getElementById('loading-screen');
+                loadingScreen.classList.add('hidden');
+                
+                // Show all UI elements after loading
+                document.getElementById('clock-container').classList.add('show');
+                document.getElementById('battery-container').classList.add('show');
+                document.querySelector('.navbar').classList.add('show');
+                document.getElementById('main-content').classList.add('show');
+                document.querySelector('.discord-btn').classList.add('show');
+                
+                // Remove loading screen from DOM after animation
+                setTimeout(function() {
+                    loadingScreen.remove();
+                }, 500);
+            }, 2000); // Show loading screen for 2 seconds
+        });
+
+        // Clock functionality
+        function updateClock() {
+            const now = new Date();
+            
+            // Time
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const timeString = `${hours}:${minutes}:${seconds}`;
+            
+            // Date
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            const dateString = now.toLocaleDateString('en-US', options);
+            
+            document.getElementById('clock-time').textContent = timeString;
+            document.getElementById('clock-date').textContent = dateString;
+        }
+
+        // Update clock immediately and then every second
+        updateClock();
+        setInterval(updateClock, 1000);
+
+        // Original organization names
+        const messages = [
+            "Kirby Arcade",
+            "チルカーブセントラル",
+            "Chill Kirb Develpment",
+            "Chill Vault X V6.5",
+            "Chill Kirb Network",
+            "Chill Gamez",
+            "KirbGS2Z",
+            "Chill Kirb Unite",
+            "Kirblantis",
+            "Cooking wit Kirb",
+            "KirbBurg",
+            "Arsenal Kirb",
+            "Big Kirbs Games",
+            "DemonKirb",
+            "ZXS Kirb",
+            "Quarter Kirb Garage",
+            "Kirbryix",
+            "Chill Kirb Secret Gaming Site",
+            "Kirbit",
+            "Ice Kirb",
+            "Cooking wit Kirb(Ultra)",
+            "Kirblixx",
+            "Chill Kirb Learning",
+            "CK Entertainment",
+            "(#!|| K!rb (#ntral",
+            "Chill Kirb Zone",
+            "Kirb.gg",
+            "CK-26",
+            "Chill Kirb Edition",
+            "Chill Kirb X",
+            "lɐɹʇuǝƆ qɹᴉʞ llᴉɥƆ",
+            "I CAN DO ANYTHING"
+        ];
+       
+        // Typing animation with slight variations
+        const typingElement = document.getElementById('typing-text');
+        let messageIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        let typingSpeed = 100;
+        let deleteSpeed = 40;
+        let endPause = 1200;
+       
+        function typeWriter() {
+            const currentMessage = messages[messageIndex];
+           
+            if (isDeleting) {
+                typingElement.textContent = currentMessage.substring(0, charIndex - 1);
+                charIndex--;
+               
+                if (charIndex === 0) {
+                    isDeleting = false;
+                    messageIndex = (messageIndex + 1) % messages.length;
+                    setTimeout(typeWriter, 300);
+                } else {
+                    setTimeout(typeWriter, deleteSpeed);
+                }
+            } else {
+                typingElement.textContent = currentMessage.substring(0, charIndex + 1);
+                charIndex++;
+               
+                if (charIndex === currentMessage.length) {
+                    isDeleting = true;
+                    setTimeout(typeWriter, endPause);
+                } else {
+                    setTimeout(typeWriter, typingSpeed);
+                }
+            }
+        }
+
+        // Search functionality
+        const searchButton = document.querySelector('.search-button');
+        const searchBar = document.querySelector('.search-bar');
+        
+        searchButton.addEventListener('click', performSearch);
+        searchBar.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        function performSearch() {
+            const searchTerm = searchBar.value.trim();
+            if(searchTerm !== '') {
+                // Show loading state
+                const originalIcon = searchButton.innerHTML;
+                searchButton.innerHTML = '<div class="loading"></div>';
+                searchButton.disabled = true;
+                
+                // Using Google search
+                setTimeout(function() {
+                    window.open(`https://www.google.com/search?q=${encodeURIComponent(searchTerm)}`, '_blank');
+                    searchButton.innerHTML = originalIcon;
+                    searchButton.disabled = false;
+                }, 500);
+            }
+        }
+
+        // Fixed battery status - no decimals, proper percentage
+        function updateBattery() {
+            // Use Battery API if available, otherwise use fixed value
+            if ('getBattery' in navigator) {
+                navigator.getBattery().then(function(battery) {
+                    function updateAll() {
+                        const level = Math.floor(battery.level * 100); // No decimals
+                        document.getElementById('battery-percent').textContent = `${level}%`;
+                        document.getElementById('battery-level').style.width = `${level}%`;
+                        
+                        // Color change based on level
+                        if (level <= 20) {
+                            document.getElementById('battery-level').style.background = 'linear-gradient(135deg, #ff5555, #ff0000)';
+                        } else if (level <= 50) {
+                            document.getElementById('battery-level').style.background = 'linear-gradient(135deg, #ffaa00, #ffcc00)';
+                        } else {
+                            document.getElementById('battery-level').style.background = 'linear-gradient(135deg, #00ffaa, #00cc88)';
+                        }
+                    }
+                   
+                    updateAll();
+                    battery.addEventListener('levelchange', updateAll);
+                }).catch(function(error) {
+                    // Fallback to fixed value
+                    setFixedBattery();
+                });
+            } else {
+                // Fallback to fixed value
+                setFixedBattery();
+            }
+        }
+
+        function setFixedBattery() {
+            // Fixed battery level - no decimals, won't change
+            const level = 75;
+            document.getElementById('battery-percent').textContent = `${level}%`;
+            document.getElementById('battery-level').style.width = `${level}%`;
+            
+            if (level <= 20) {
+                document.getElementById('battery-level').style.background = 'linear-gradient(135deg, #ff5555, #ff0000)';
+            } else if (level <= 50) {
+                document.getElementById('battery-level').style.background = 'linear-gradient(135deg, #ffaa00, #ffcc00)';
+            } else {
+                document.getElementById('battery-level').style.background = 'linear-gradient(135deg, #00ffaa, #00cc88)';
+            }
+        }
+
+        // Initialize everything
+        function init() {
+            typeWriter();
+            updateBattery();
+        }
+
+        // Start when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
