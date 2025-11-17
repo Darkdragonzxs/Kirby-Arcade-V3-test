@@ -1,8 +1,8 @@
 {
-  "name": "skryptonite",
-  "description": "skryptonite: where unblocking possibilities are endless.",
-  "repository": "https://github.com/razzlerazing4/skryptonite",
-  "logo": "/assets/media/background/BYPASS.png",
-  "keywords": ["school", "math"],
+  "name": "Kirby Arcade V3",
+  "description": "Unblocked Games",
+  "repository": "https://github.com/dino-cmxy/Kirby-Arcade-V3/",
+  "logo": "/assets/images/logo.png",
+  "keywords": ["school", "education"],
   "image": "heroku/nodejs"
 }
