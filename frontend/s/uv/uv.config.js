@@ -1,6 +1,6 @@
 self.__uv$config = {
-	prefix: "/s/kibidi/sigma/",
-	bare: "/fq/",
+	prefix: "/s/ocialstudies/",
+	bare: "/kirby/",
 	encodeUrl: Ultraviolet.codec.xor.encode,
 	decodeUrl: Ultraviolet.codec.xor.decode,
 	handler: "/s/uv/uv.handler.js",
