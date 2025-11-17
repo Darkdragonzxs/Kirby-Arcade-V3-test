@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>404 - Register Service Worker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Mono:wght@400;700;900&display=swap');
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Fira Mono', monospace;
+            color: #fff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Background GIF as full-screen */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://cdn.jsdelivr.net/gh/dino-cmxy/Kirby-Arcade-ig-idk-anymore@main/pxsprite-kirbyinspaceee.gif') center center / cover no-repeat;
+            z-index: -1;
+        }
+
+        h1 {
+            font-size: 6rem;
+            font-weight: 900;
+            background: linear-gradient(90deg, #ff9ce3, #ffeb99, #99ffda, #99ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 12px rgba(255, 156, 227, 0.7),
+                         0 0 16px rgba(255, 235, 153, 0.7),
+                         0 0 20px rgba(153, 255, 218, 0.7),
+                         0 0 24px rgba(153, 204, 255, 0.7);
+            margin: 0;
+        }
+
+        p {
+            font-size: 1.5rem;
+            color: #99ccff;
+            text-shadow: 0 0 8px rgba(153, 204, 255, 0.5);
+            margin: 20px 0 40px 0;
+        }
+
+        /* Liquid glass button */
+        .glass-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 28px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            gap: 10px;
+        }
+
+        .glass-btn:hover {
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 0 30px rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>404</h1>
+        <p>Reload the page to register the service worker.</p>
+        <button class="glass-btn" onclick="location.reload()">
+            <i class="fas fa-sync-alt"></i> Register SW
+        </button>
+    </div>
+</body>
+</html>
