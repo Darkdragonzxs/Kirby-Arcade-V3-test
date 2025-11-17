@@ -17,7 +17,7 @@ console.log(chalk.yellow("Starting npm node.js server using file </index.js\>"))
 const __dirname = process.cwd();
 const server = http.createServer();
 const app = express();
-const bareServer = createBareServer("/fq/");
+const bareServer = createBareServer("/kirby/");
 const PORT = process.env.PORT || 6969;
 const cache = new Map();
 const CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // Cache for 30 Days
@@ -94,7 +94,7 @@ app.use(express.urlencoded({ extended: true }));
   setupMasqr(app);
 } */
 
-app.use(express.static(path.join(__dirname, "mango")));
+app.use(express.static(path.join(__dirname, "frontend")));
 app.use("/fq", cors({ origin: true }));
 
 const routes = [
@@ -117,17 +117,17 @@ const routes = [
 // biome-ignore lint/complexity/noForEach:
 routes.forEach((route) => {
   app.get(route.path, (_req, res) => {
-    res.sendFile(path.join(__dirname, "mango", route.file));
+    res.sendFile(path.join(__dirname, "frontend", route.file));
   });
 });
 
 app.use((req, res, next) => {
-  res.status(404).sendFile(path.join(__dirname, "mango", "404.html"));
+  res.status(404).sendFile(path.join(__dirname, "frontend", "404.html"));
 });
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).sendFile(path.join(__dirname, "mango", "404.html"));
+  res.status(500).sendFile(path.join(__dirname, "frontend", "404.html"));
 });
 
 server.on("request", (req, res) => {
