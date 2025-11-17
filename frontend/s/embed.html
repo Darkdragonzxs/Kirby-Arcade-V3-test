@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Loading...</title>
+    <style>
+        /* not taken from a template btw */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #0d0d1a;
+            overflow: hidden;
+            font-family: 'Fira Mono', 'Consolas', monospace;
+        }
+
+        .star {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #fff;
+            opacity: 0.8;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.5); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.3; }
+        }
+
+        .loader {
+            width: 70px;
+            height: 70px;
+            border: 6px solid rgba(255, 255, 255, 0.2);
+            border-top: 6px solid #ff9ce3;
+            border-radius: 50%;
+            animation: spin 1.5s linear infinite;
+            box-shadow: 0 0 20px rgba(255, 156, 227, 0.6);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-top: 18px;
+            background: linear-gradient(90deg, #ff9ce3, #ffeb99, #99ffda, #99ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 8px rgba(255, 156, 227, 0.7),
+                         0 0 12px rgba(255, 235, 153, 0.7),
+                         0 0 16px rgba(153, 255, 218, 0.7),
+                         0 0 20px rgba(153, 204, 255, 0.7);
+            animation: textRainbow 3s linear infinite;
+        }
+
+        .tips {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #ff9ce3, #ffeb99, #99ffda, #99ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 6px rgba(255, 156, 227, 0.6),
+                         0 0 10px rgba(255, 235, 153, 0.6),
+                         0 0 14px rgba(153, 255, 218, 0.6),
+                         0 0 18px rgba(153, 204, 255, 0.6);
+            text-align: center;
+            animation: textRainbow 3s linear infinite;
+        }
+
+        @keyframes textRainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+    </style>
+    <script src="uv/uv.bundle.js" defer></script>
+    <script src="uv/uv.config.js" defer></script>
+    <script src="register-sw.js" defer></script>
+    <script src="embed.js" defer></script>
+</head>
+<body>
+    <div class="star" style="top:10%; left:20%; animation-delay: 0s;"></div>
+    <div class="star" style="top:50%; left:80%; animation-delay: 1s;"></div>
+    <div class="star" style="top:70%; left:30%; animation-delay: 2s;"></div>
+    <div class="star" style="top:30%; left:60%; animation-delay: 1.5s;"></div>
+    <div class="star" style="top:80%; left:50%; animation-delay: 2.5s;"></div>
+
+    <div class="loader"></div>
+    <div class="loading-text">Loading...</div>
+    <div class="tips">Please wait a moment.</div>
+</body>
+</html>
